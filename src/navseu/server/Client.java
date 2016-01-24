@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import navseu.processor.ProcessMessage;
 public class Client {
 	public String servername = "irc.twitch.tv";
 	public int port = 6667;
@@ -21,9 +23,10 @@ public class Client {
 	public InputStreamReader isr;
 	public String message = "potato";
 	public ArrayList connectedChannels = new ArrayList<String>();
-	public Client()
+	public ProcessMessage pm;
+	public Client(ProcessMessage processmessage)
 	{
-		
+		pm = processmessage;
 		try
 		{
 			
@@ -57,7 +60,7 @@ public class Client {
 	}
 	public void processMessage(String message)
 	{
-		
+		pm.receiveMessage(message);
 	}
 	public void login() throws IOException
 	{
@@ -143,6 +146,20 @@ public class Client {
 		{
 			ioException.printStackTrace();
 		}
+	}
+	public boolean containsMessage() throws IOException
+	{
+		return br.ready();
+	}
+	public void readMessage() throws IOException
+	{
+		message = br.readLine();
+		processMessage(message);
+		System.out.println(message);
+	}
+	public void pong()
+	{
+		sendMessage("PONG tmi.twitch.tv");
 	}
 	
 	
