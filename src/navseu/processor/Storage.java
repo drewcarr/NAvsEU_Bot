@@ -23,6 +23,7 @@ public class Storage {
 	}
 	public void addKappa()
 	{
+		System.out.println("Added Kappa");
 		kappa ++;
 	}
 	public int getKappa()

@@ -6,29 +6,70 @@ import navseu.server.Client;
 
 public class ProcessMessage {
 	public Client client;
-	public Storage storage;
-	public ProcessMessage(Client c,Storage s)
+	public CharSequence charNA = "na";
+	public CharSequence charEU = "eu";
+	public CharSequence charKappa = "kappa";
+	public CharSequence charPogchamp = "pogchamp";
+	public ProcessMessage(Client c)
 	{
 		client = c;
-		storage = s;
 	}
 	public void receiveMessage(String mess)
 	{
-		String[] Premessage = mess.split(":");
-		Premessage[1] = Premessage[1].trim();
-		switch(Premessage[1])
+		ArrayList<Integer> index = new ArrayList<Integer>();
+		int i = mess.indexOf(":");
+		while(i >= 0)
 		{
-			case "PING": client.pong();
+			index.add(i);
+			i = mess.indexOf(":", i+1);
 		}
-		String[] message = Premessage[2].split(" ");
-		for(int x = 0; x < message.length; x++)
+		
+		if(mess.startsWith("PING"))
 		{
-			switch(message[x])
+			client.pong();
+		}
+		
+		else
+		{	
+			String messa = mess.toLowerCase();
+			if(messa.contains(charKappa) || messa.contains(charPogchamp) || messa.contains(charNA) || messa.contains(charEU))
 			{
-				case "NA": storage.addNA();
-				case "EU": storage.addEU();
-				case "Kappa": storage.addKappa();
-				case "PogChamp": storage.addPogchamp();
+				int hashtag = mess.indexOf("#");
+				int space = mess.indexOf(" ",hashtag);
+				String channel = mess.substring(hashtag+1,space);
+				if(index.size() >= 2)
+				{
+					String Premessage = mess.substring(index.get(1)+1,mess.length());
+					String[] message = Premessage.split(" ");
+					if(message[0].startsWith("!NAvsEU"))
+					{
+						if(client.getStorage(channel).getNA() >= client.getStorage(channel).getEU())
+						{
+							client.sendChat("The NA spam is greater");
+						}
+						else
+						{
+							client.sendMessage("The EU spam is greater");
+						}
+					}
+					for(int x = 0; x < message.length; x++)
+					{
+						message[x] = message[x].toLowerCase();
+						switch(message[x])
+						{
+							case "na": 			client.getStorage(channel).addNA();
+												break;
+							case "eu": 			client.getStorage(channel).addEU();
+												break;
+							case "kappa": 		client.getStorage(channel).addKappa();
+												break;
+							case "pogchamp": 	client.getStorage(channel).addPogchamp();
+												break;
+												
+							
+						}
+					}
+				}
 			}
 		}
 	}

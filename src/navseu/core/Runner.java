@@ -8,18 +8,20 @@ import navseu.processor.Storage;
 import navseu.server.Client;
 
 public class Runner {
-	public static Storage storage;
 	public static Client client;
 	public static ProcessMessage pm;
 	public static DisplayFrame frame;
 	public static void main(String args[]) throws IOException
 	{
-		storage = new Storage();
 		client = null;
-		pm = new ProcessMessage(client,storage);
 		client = new Client(pm);
-		frame = new DisplayFrame(storage);
-		client.joinChannel("sodapoppin");
+		pm = new ProcessMessage(client);
+		client.updateProcessor(pm);
+		
+		client.joinChannel("netherrealm");
+		client.joinChannel("scglive");
+		client.joinChannel("gcdtv");
+		frame = new DisplayFrame(client);
 		run();
 	}
 	public static void run() throws IOException
@@ -29,7 +31,7 @@ public class Runner {
 			if(client.containsMessage() == true)
 			{
 				client.readMessage();
-				frame.updateFrame();
+				frame.updateFrame(client);
 			}
 			
 		}

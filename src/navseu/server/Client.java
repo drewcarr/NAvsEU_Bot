@@ -9,20 +9,23 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import navseu.processor.ProcessMessage;
+import navseu.processor.Storage;
 public class Client {
 	public String servername = "irc.twitch.tv";
 	public int port = 6667;
 	public Socket socket;
-	public String username = "remywarfly";
+	public String username = "navseubot";
 	public String password = "oauth:68phvkvj3jiuxucmxgnblrkqvdgc4a";
 	public PrintWriter pw;
 	public BufferedReader br;
 	public BufferedReader fr;
 	public InputStreamReader isr;
 	public String message = "potato";
-	public ArrayList connectedChannels = new ArrayList<String>();
+	public ArrayList<String> connectedChannels = new ArrayList<String>();
+	public HashMap<String,Storage> masterStorage = new HashMap<String,Storage>();
 	public ProcessMessage pm;
 	public Client(ProcessMessage processmessage)
 	{
@@ -90,6 +93,8 @@ public class Client {
 			System.out.println("Error: " + ioException);
 		}
 		connectedChannels.add(channel);
+		Storage storage = new Storage();
+		masterStorage.put(channel,storage);
 	}
 	public void leaveChannel(String channel)
 	{
@@ -108,6 +113,7 @@ public class Client {
 			System.out.println("Error: " + ioException);
 		}
 		connectedChannels.remove(channel);
+		masterStorage.remove(channel);
 	}
 	public void sendChat(String channel, String message)
 	{
@@ -122,6 +128,18 @@ public class Client {
 		else
 		{
 			System.out.println("You are not connected to this chat");
+		}
+	}
+	public void sendChat(String message)
+	{
+		//sends message to all connected channels
+		for(int x = 0; x < connectedChannels.size(); x++)
+		{
+			String prefix = "PRIVMSG #";
+			prefix += connectedChannels.get(x);
+			prefix += " :";
+			String finalMessage = prefix + message;
+			sendMessage(finalMessage);
 		}
 	}
 	public void reveiveMessages() throws IOException
@@ -161,6 +179,32 @@ public class Client {
 	{
 		sendMessage("PONG tmi.twitch.tv");
 	}
-	
-	
+	public void updateProcessor(ProcessMessage p)
+	{
+		pm = p;
+	}
+	public HashMap getMasterStorage()
+	{
+		return masterStorage;
+	}
+	public Storage getStorage(String key)
+	{
+		if(masterStorage.containsKey(key) == true)
+		{
+			return masterStorage.get(key);
+		}
+		else
+		{
+			System.out.println("Couldn't find key: " + key +"end");
+			return null;
+		}
+	}
+	public ArrayList getChannels()
+	{
+		return connectedChannels;
+	}
+	public String getChannel(int x)
+	{
+		return connectedChannels.get(x);
+	}
 }
